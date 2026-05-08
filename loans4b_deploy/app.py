@@ -2,7 +2,7 @@ from flask import Flask, request, send_file, render_template, jsonify
 import json, os, tempfile, traceback
 from gen_leaseback_v2 import generate_pdf
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logo_clean.png')
 
 @app.route('/')
