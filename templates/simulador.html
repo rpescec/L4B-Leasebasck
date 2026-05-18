@@ -134,7 +134,8 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4F8;color:var(--text);min-h
   <div class="params-grid">
     <div class="pi"><div class="pl">Tasa mensual</div><div class="pv">1.1%</div></div>
     <div class="pi"><div class="pl">% Compraventa</div><div class="pv">55%</div></div>
-    <div class="pi"><div class="pl">Estructuración financiera</div><div class="pv">6%</div></div>
+    <div class="pi"><div class="pl">Estructuración financiera</div><div class="pv">3%</div></div>
+    <div class="pi"><div class="pl">Fee de Estructuración Fin.</div><div class="pv">3%</div></div>
     <div class="pi"><div class="pl">Gastos operacionales</div><div class="pv">2%</div></div>
     <div class="pi"><div class="pl">Gastos Notaría / CBR</div><div class="pv">$2.690.000</div></div>
     <div class="pi"><div class="pl">Plazo</div><div class="pv">12 meses</div></div>
@@ -144,7 +145,8 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4F8;color:var(--text);min-h
     <div class="g3" style="margin-bottom:8px">
       <div class="field"><label>Tasa mensual (%)</label><input type="number" id="tm" value="1.1" step="0.1" min="0.1" max="5"></div>
       <div class="field"><label>% Compraventa</label><input type="number" id="pf" value="55" step="1" min="10" max="100" oninput="prevVF()"></div>
-      <div class="field"><label>Estructuración (%)</label><input type="number" id="fe" value="6" step="0.5" min="0" max="20"></div>
+      <div class="field"><label>Estructuración (%)</label><input type="number" id="fe" value="3" step="0.5" min="0" max="20"></div>
+      <div class="field"><label>Fee de Estructuración Fin. (%)</label><input type="number" id="fee_fondo" value="3" step="0.5" min="0" max="20"></div>
     </div>
     <div class="g3">
       <div class="field"><label>Gastos operativos (%)</label><input type="number" id="go" value="2" step="0.5" min="0" max="20"></div>
@@ -204,8 +206,8 @@ function calcular(){
   const vc=g('vc'),pf=g('pf')/100,tm=g('tm')/100,plz=g('plazo'),
         go=g('go')/100,fe=g('fe')/100,cbr=g('cbr'),deu=g('deu');
   if(!vc){alert('Ingresa el valor comercial');return;}
-  const vf=vc*pf,goA=vf*go,feA=vf*fe,ia1=vf*tm*12;
-  const desc=ia1+feA;const ml=vf-desc-deu;
+  const ff=g("fee_fondo")/100;const vf=vc*pf,goA=vf*go,feA=vf*fe,ffA=vf*ff,ia1=vf*tm*12;
+  const desc=ia1+feA+ffA;const ml=vf-desc-deu;
   const cuota=plz>0?vf*(tm*Math.pow(1+tm,plz))/(Math.pow(1+tm,plz)-1):vf;
   const tp=cuota*plz,cf=tp-vf,tae=(Math.pow(1+tm,12)-1)*100;
   RES={vc,pf,vf,tm:g('tm'),plz,go:g('go'),fe:g('fe'),cbr,deu,goA,feA,ia1,desc,ml,vr:vf,cuota,tp,cf,tae};
@@ -226,6 +228,7 @@ function calcular(){
     {l:'Desglose (giro bruto)',p:'',v:fc(vf),u:fuf(vf),t:'alt'},
     {l:'Prepago de Renta',p:'',v:fc(ia1),u:'',t:'normal'},
     {l:'Estructuración Financiera',p:fp(g('fe')),v:fc(feA),u:'',t:'alt'},
+    {l:'Fee de Estructuración Financiera',p:fp(g('fee_fondo')||0),v:fc(ffA),u:'',t:'normal'},
     {t:'sep'},
     {l:'Gastos Operacionales Totales',p:'',v:fc(desc),u:fuf(desc),t:'teal'},
     ...(deu>0?[{l:'(–) Deuda actual a cancelar',p:'',v:fc(deu),u:fuf(deu),t:'deuda'}]:[]),
@@ -256,7 +259,7 @@ async function generarPDF(){
     avaluo_fiscal_clp:0,avaluo_exento_clp:0,avaluo_afecto_clp:0,
     val_comercial:RES.vc,pct_financiamiento:RES.pf*100,plazo_meses:RES.plz,
     tasa_mensual:RES.tm,pct_gastos_oper:RES.go,pct_fee_estructuracion:RES.fe,
-    pct_fee_fondo:0,prepago_rentas:0,acreedor:0,gastos_cbr:RES.cbr,
+    pct_fee_fondo:g('fee_fondo')||0,prepago_rentas:0,acreedor:0,gastos_cbr:RES.cbr,
     deuda_actual:RES.deu||0,tesore:0,uf_clp:UF
   };
   try{

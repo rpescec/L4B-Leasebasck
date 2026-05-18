@@ -197,8 +197,8 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4F8;color:var(--text);min-h
   <div id="pvfd" style="display:none;background:var(--tl);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#0A5E5A">Valor compraventa: <strong id="pvf">-</strong></div>
   <div class="g4" style="margin-bottom:12px">
     <div class="field"><label>Tasa mensual (%)</label><input type="number" id="tm" value="1.5" min="0.1" max="5" step="0.1"></div>
-    <div class="field"><label>Estructuración (%)</label><input type="number" id="fe" value="8" min="0" max="20" step="0.5"></div>
-    <div class="field"><label>Fee Fondo (%)</label><input type="number" id="fee_fondo" value="0" min="0" max="20" step="0.5"></div>
+    <div class="field"><label>Estructuración (%)</label><input type="number" id="fe" value="3" min="0" max="20" step="0.5"></div>
+    <div class="field"><label>Fee de Estructuración Fin. (%)</label><input type="number" id="fee_fondo" value="3" min="0" max="20" step="0.5"></div>
     <div class="field"><label>Gastos operativos (%)</label><input type="number" id="go" value="2" min="0" max="20" step="0.5"></div>
   </div>
   <div class="g3">
@@ -296,7 +296,7 @@ function calcular(){
     {l:'Desglose (giro bruto)',p:'',v:fc(vf),u:fuf(vf,uf),t:'alt'},
     {l:'Prepago de Renta',p:'',v:fc(ia1),u:'',t:'normal'},
     {l:'Estructuración Financiera',p:fp(g('fe')),v:fc(feA),u:'',t:'alt'},
-    ...(ffA>0?[{l:'Fee Estructuración Fondo',p:fp(g('fee_fondo')),v:fc(ffA),u:'',t:'normal'}]:[]),
+    {l:'Fee de Estructuración Financiera',p:fp(g('fee_fondo')),v:fc(ffA),u:'',t:'normal'},
     {t:'sep'},
     {l:'Gastos Operacionales Totales',p:'',v:fc(desc),u:fuf(desc,uf),t:'teal'},
     ...(deu>0?[{l:'(–) Deuda actual a cancelar',p:'',v:fc(deu),u:fuf(deu,uf),t:'deuda'}]:[]),

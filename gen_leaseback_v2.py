@@ -319,7 +319,7 @@ def sim_table_full(r, uf):
         ('Desglose (Giro bruto)','',fmtc(vf),fmtuf(vf,uf),'normal'),
         ('Prepago de Renta','',fmtc(r['interes_anio1']),'','normal'),
         ('Estructuración Financiera',fmtpm(r['pct_fee']*100),fmtc(r['fee_estruct']),'','normal'),
-        ('Fee Estructuración Fondo',fmtpm(r['pct_fee_fondo']*100),fmtc(r['fee_fondo']),'','normal') if r['fee_fondo']>0 else None,
+        ('Fee de Estructuración Financiera',fmtpm(r['pct_fee_fondo']*100),fmtc(r['fee_fondo']),'','normal'),
         ('Gastos Operacionales Totales','',fmtc(r['descuentos']),fmtuf(r['descuentos'],uf),'teal_bottom'),
         ('(-) Deuda actual a cancelar','',fmtc(r['deuda_actual']),fmtuf(r['deuda_actual'],uf),'normal') if r['deuda_actual']>0 else None,
         ('Capital Entregado al Deudor','',fmtc(r['monto_liquido']),fmtuf(r['monto_liquido'],uf),'green'),
