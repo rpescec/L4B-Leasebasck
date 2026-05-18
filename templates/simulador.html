@@ -205,7 +205,7 @@ function calcular(){
         go=g('go')/100,fe=g('fe')/100,cbr=g('cbr'),deu=g('deu');
   if(!vc){alert('Ingresa el valor comercial');return;}
   const vf=vc*pf,goA=vf*go,feA=vf*fe,ia1=vf*tm*12;
-  const desc=ia1+feA;const ml=vf-desc-goA-cbr-deu;
+  const desc=ia1+feA;const ml=vf-desc-deu;
   const cuota=plz>0?vf*(tm*Math.pow(1+tm,plz))/(Math.pow(1+tm,plz)-1):vf;
   const tp=cuota*plz,cf=tp-vf,tae=(Math.pow(1+tm,12)-1)*100;
   RES={vc,pf,vf,tm:g('tm'),plz,go:g('go'),fe:g('fe'),cbr,deu,goA,feA,ia1,desc,ml,vr:vf,cuota,tp,cf,tae};

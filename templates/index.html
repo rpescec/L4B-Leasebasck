@@ -277,7 +277,7 @@ function calcular(){
         cbr=g('cbr'),deu=g('deu'),uf=g('uf_clp')||40040;
   if(!vc){alert('Ingresa el valor de tasación comercial');return;}
   const vf=vc*pf,goA=vf*go,feA=vf*fe,ffA=vf*ff,ia1=vf*tm*12;
-  const desc=ia1+feA+ffA;const ml=vf-desc-goA-cbr-deu;
+  const desc=ia1+feA+ffA;const ml=vf-desc-deu;
   const cuota=plz>0?vf*(tm*Math.pow(1+tm,plz))/(Math.pow(1+tm,plz)-1):vf;
   const tp=cuota*plz,cf=tp-vf,tae=(Math.pow(1+tm,12)-1)*100;
   RES={vc,pf,vf,tm:g('tm'),plz,go:g('go'),fe:g('fe'),ff:g('fee_fondo'),cbr,deu,goA,feA,ffA,ia1,desc,ml,vr:vf,cuota,tp,cf,tae,uf};

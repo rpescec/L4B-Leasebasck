@@ -56,7 +56,7 @@ def calcular(d):
     ffA  = vf * pff
     ia1  = vf * tm * 12
     desc = ia1 + feA + ffA
-    ml   = vf - desc - goA - cbr - deu
+    ml   = vf - desc - deu
 
     cuota = vf*(tm*(1+tm)**plz)/((1+tm)**plz-1) if plz > 0 else vf
     amort, saldo = [], vf
