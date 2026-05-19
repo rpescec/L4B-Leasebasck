@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Hipotecario — Loans4B</title>
+  <style>
+    :root {
+      --bg:       #ffffff;
+      --bg2:      #f7fafc;
+      --bg3:      #f0f4f8;
+      --text:     #1a202c;
+      --text2:    #4a5568;
+      --text3:    #8fa3b8;
+      --border:   rgba(26,32,44,0.13);
+      --border2:  rgba(26,32,44,0.28);
+      --blue:     #2b7bb9;
+      --blue-dk:  #1a5f9a;
+      --blue-bg:  #ebf4fc;
+      --blue-brd: rgba(43,123,185,0.40);
+      --green:    #4dc8a0;
+      --radius:   8px;
+      --radius-lg:12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a202c; --bg2: #2d3748; --bg3: #374151;
+        --text: #f7fafc; --text2: #a0aec0; --text3: #718096;
+        --border: rgba(255,255,255,0.12); --border2: rgba(255,255,255,0.25);
+        --blue-bg: rgba(43,123,185,0.18);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg3); color: var(--text); min-height: 100vh; }
+
+    /* ── Navegación ──────────────────────────────────────────────────────── */
+    .nav {
+      background: var(--bg);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin-right: 28px;
+      flex-shrink: 0;
+    }
+    .nav-logo .b { color: var(--blue); }
+    .nav-logo .g { color: var(--green); }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text3);
+      text-decoration: none;
+      border-radius: var(--radius);
+      transition: all .15s;
+    }
+    .nav-links a:hover { background: var(--bg2); color: var(--text); }
+    .nav-links a.active { background: var(--blue-bg); color: var(--blue); }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .page { max-width: 760px; margin: 24px auto; padding: 0 16px 48px; }
+    .card { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 24px 28px; }
+
+    /* ── Tabs ────────────────────────────────────────────────────────────── */
+    .tabs { display: flex; border-bottom: 0.5px solid var(--border); margin-bottom: 20px; }
+    .tab { padding: 8px 18px; font-size: 13px; font-weight: 500; font-family: var(--font); border: none; border-bottom: 2px solid transparent; background: none; color: var(--text3); cursor: pointer; margin-bottom: -.5px; }
+    .tab.on { color: var(--text); border-bottom-color: var(--blue); }
+
+    /* ── UF Bar ──────────────────────────────────────────────────────────── */
+    .ufbar { display: flex; justify-content: space-between; align-items: center; background: var(--bg2); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 20px; }
+    .uf-val { font-size: 16px; font-weight: 600; color: var(--blue); }
+    .uf-src { font-size: 10px; color: var(--text3); margin-top: 2px; }
+    .uf-manual { display: none; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+
+    /* ── Sección ─────────────────────────────────────────────────────────── */
+    .sttl { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); margin: 20px 0 12px; }
+
+    /* ── Grids ───────────────────────────────────────────────────────────── */
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .g4 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+    @media (max-width: 520px) { .g3,.g4 { grid-template-columns: 1fr 1fr; } .sp2 { grid-column: span 2; } }
+
+    /* ── Campos ──────────────────────────────────────────────────────────── */
+    .fld { display: flex; flex-direction: column; gap: 4px; }
+    .fld label { font-size: 11px; color: var(--text2); }
+    input, select { padding: 7px 9px; font-size: 13px; font-family: var(--font); border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); width: 100%; }
+    input:focus, select:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+    /* ── Toggle tipo persona ─────────────────────────────────────────────── */
+    .tog { display: flex; gap: 6px; margin-bottom: 12px; }
+    .tog button { flex: 1; padding: 7px 10px; font-size: 12px; font-weight: 500; font-family: var(--font); border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text2); cursor: pointer; }
+    .tog button.on { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-brd); }
+
+    /* ── Inner card ──────────────────────────────────────────────────────── */
+    .icard { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 12px; }
+
+    /* ── Métricas ────────────────────────────────────────────────────────── */
+    .met { background: var(--bg2); border-radius: var(--radius); padding: 10px 8px; text-align: center; }
+    .met .ml { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
+    .met .mv { font-size: 15px; font-weight: 600; color: var(--text); }
+    .met .ms { font-size: 10px; color: var(--text3); margin-top: 2px; }
+    .met.hi .mv { color: var(--blue); }
+    .met.hi { border: 0.5px solid var(--blue-brd); }
+
+    /* ── Info rows ───────────────────────────────────────────────────────── */
+    .ir { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 0.5px solid var(--border); }
+    .ir:last-child { border: none; }
+    .ir .k { color: var(--text3); }
+    .ir .v { font-weight: 600; }
+    .ir.bold { font-size: 13px; font-weight: 600; }
+    .ir.bold .v { color: var(--blue); }
+
+    /* ── Seguros ─────────────────────────────────────────────────────────── */
+    .sg { display: grid; grid-template-columns: 1fr 80px 110px; gap: 6px; align-items: center; font-size: 12px; padding: 5px 0; border-bottom: 0.5px solid var(--border); }
+    .sg:last-child { border: none; }
+    .sg input { padding: 4px 6px; font-size: 12px; text-align: right; width: 80px; }
+    .sg-hdr { font-size: 10px; font-weight: 600; color: var(--text3); }
+    .sg-tot { display: grid; grid-template-columns: 1fr 80px 110px; gap: 6px; font-size: 12px; font-weight: 600; padding: 7px 0 2px; border-top: 0.5px solid var(--border2); margin-top: 4px; }
+
+    /* ── Barra ───────────────────────────────────────────────────────────── */
+    .bw { margin: 12px 0; }
+    .bt { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+    .bbg { height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+    .bfi { height: 100%; border-radius: 3px; background: var(--blue); transition: width .3s; }
+
+    /* ── Amortización ────────────────────────────────────────────────────── */
+    .amw { border: 0.5px solid var(--border); border-radius: var(--radius); overflow: auto; max-height: 190px; margin-bottom: 16px; }
+    table.am { width: 100%; border-collapse: collapse; font-size: 11px; }
+    table.am thead { position: sticky; top: 0; background: var(--bg2); }
+    table.am th { padding: 6px 7px; text-align: right; font-weight: 600; color: var(--text3); white-space: nowrap; }
+    table.am th:first-child { text-align: left; }
+    table.am td { padding: 5px 7px; text-align: right; border-top: 0.5px solid var(--border); color: var(--text); }
+    table.am td:first-child { text-align: left; color: var(--text3); }
+
+    /* ── Botones ─────────────────────────────────────────────────────────── */
+    .btn { width: 100%; padding: 10px; font-size: 13px; font-weight: 600; font-family: var(--font); border: 0.5px solid var(--blue); border-radius: var(--radius); background: var(--bg); color: var(--blue); cursor: pointer; margin-bottom: 8px; transition: background .15s; }
+    .btn:hover:not(:disabled) { background: var(--blue-bg); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-pdf { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .btn-pdf:hover:not(:disabled) { background: var(--blue-dk); }
+    .btn2 { width: 100%; padding: 10px; font-size: 13px; font-family: var(--font); border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text2); cursor: pointer; margin-bottom: 8px; }
+    .btn2:hover { background: var(--bg2); }
+    .err { color: #e53e3e; font-size: 12px; margin-top: 6px; display: none; }
+
+    /* ── Informe ─────────────────────────────────────────────────────────── */
+    .rpt-hdr { background: var(--bg); border: 1.5px solid var(--blue); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .rpt-logo { font-size: 24px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+    .rpt-logo .b { color: var(--blue); }
+    .rpt-logo .g { color: var(--green); }
+    .rpt-meta { text-align: right; font-size: 11px; color: var(--text2); line-height: 1.9; }
+    .rpt-meta strong { color: var(--blue-dk); font-size: 13px; display: block; margin-bottom: 4px; }
+    .rpt-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 12px; }
+    .rpt-text { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 12px; }
+    .rpt-text:last-child { margin-bottom: 0; }
+    .rpt-hi { background: var(--blue-bg); border-left: 2.5px solid var(--blue); padding: 12px 14px; border-radius: 0 var(--radius) var(--radius) 0; margin: 12px 0; font-size: 13px; line-height: 1.8; color: var(--text2); }
+    .rpt-nota { background: var(--bg2); border-radius: var(--radius); padding: 8px 12px; font-size: 12px; color: var(--text3); margin: 8px 0; line-height: 1.6; }
+    .rpt-sec { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    table.rtbl { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+    table.rtbl th { background: var(--bg2); padding: 6px 8px; text-align: left; font-weight: 600; color: var(--text3); font-size: 11px; }
+    table.rtbl td { padding: 6px 8px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+    table.rtbl td:last-child { text-align: right; font-weight: 600; }
+    table.rtbl .tot td { background: var(--blue-bg); color: var(--blue); font-weight: 700; }
+    .rpt-sig { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 14px; padding-top: 12px; border-top: 0.5px solid var(--border); }
+    .rpt-ft { background: var(--bg2); border-radius: var(--radius); padding: 8px 12px; font-size: 11px; color: var(--text3); margin-bottom: 8px; line-height: 1.6; }
+    .rpt-dis { font-size: 10px; color: var(--text3); line-height: 1.6; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; }
+
+    @media print {
+      .nav, #sim-view, .tabs, .rpt-actions { display: none !important; }
+      body { background: white; }
+      .card { box-shadow: none; border: none; padding: 0; }
+      #rpt-view { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navegación -->
+<nav class="nav">
+  <div class="nav-logo">
+    <span class="b">loan$</span><span class="g">4</span><span class="b">B</span><span style="font-size:12px;font-weight:500">.com</span>
+  </div>
+  <div class="nav-links">
+    <a href="/leaseback">Reporte Leaseback</a>
+    <a href="/simulador">Simulador Rápido</a>
+    <a href="/hipotecario" class="active">Hipotecario</a>
+  </div>
+</nav>
+
+<div class="page">
+<div class="card">
+
+  <div class="tabs">
+    <button class="tab on" id="t-sim" onclick="showTab('sim')">Simulador</button>
+    <button class="tab" id="t-rpt" onclick="showTab('rpt')">Vista previa informe</button>
+  </div>
+
+  <!-- ── SIMULADOR ─────────────────────────────────────────────────────── -->
+  <div id="sim-view">
+
+    <div class="ufbar">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:2px">UF vigente · mindicador.cl</div>
+        <div class="uf-val" id="uf-d">$39.908</div>
+        <div class="uf-src" id="uf-s">Cargando…</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="uf-m" class="uf-manual">
+          <span>Valor manual:</span>
+          <input type="number" id="uf-i" value="39908" style="width:95px" oninput="UFV=parseFloat(this.value)||39908;calc()">
+        </div>
+        <div style="font-size:10px;color:var(--text3);text-align:right" id="uf-f"></div>
+      </div>
+    </div>
+
+    <div class="sttl">Datos del cliente</div>
+    <div class="tog">
+      <button class="on" id="tp-n" onclick="setTipo('n')">Persona Natural</button>
+      <button id="tp-j" onclick="setTipo('j')">Persona Jurídica</button>
+    </div>
+    <div class="g3" style="margin-bottom:10px">
+      <div class="fld sp2" style="grid-column:span 2">
+        <label>Nombre completo / Razón social</label>
+        <input type="text" id="cl-n" placeholder="Ej: María González / Empresa S.A." oninput="updRpt()">
+      </div>
+      <div class="fld">
+        <label>RUT</label>
+        <input type="text" id="cl-r" placeholder="76.085.148-K" oninput="updRpt()">
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:4px">
+      <div class="fld">
+        <label>Asesor responsable</label>
+        <input type="text" id="cl-a" value="Asesor Loans4B" oninput="updRpt()">
+      </div>
+      <div class="fld">
+        <label>Correo del cliente</label>
+        <input type="text" id="cl-e" placeholder="cliente@email.com">
+      </div>
+    </div>
+
+    <div class="sttl">Parámetros del crédito</div>
+    <div class="g3" style="margin-bottom:10px">
+      <div class="fld"><label>Valor del inmueble (UF)</label><input type="number" id="p-vi" value="4000" step="10" oninput="calc()"></div>
+      <div class="fld"><label>Pie (UF)</label><input type="number" id="p-pie" value="800" step="10" oninput="calc()"></div>
+      <div class="fld"><label>Plazo (años)</label>
+        <select id="p-pz" onchange="calc()">
+          <option>5</option><option>8</option><option>10</option><option>12</option>
+          <option>15</option><option value="20" selected>20</option><option>25</option><option>30</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="margin-bottom:10px">
+      <div class="fld"><label>Tasa nominal anual (%)</label><input type="number" id="p-ta" value="4.5" step="0.1" min="0.1" max="30" oninput="calc()"></div>
+      <div class="fld"><label>Tipo de tasa</label>
+        <select id="p-tt" onchange="calc()">
+          <option value="fija">Fija</option><option value="variable">Variable</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="icard">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500">
+        <input type="checkbox" id="sub-c" onchange="togSub()" style="width:15px;height:15px;accent-color:var(--blue)">
+        ¿Aplica subsidio habitacional?
+      </label>
+      <div id="sub-r" style="display:none;margin-top:12px">
+        <div class="fld"><label>Monto del subsidio (UF)</label><input type="number" id="sub-m" value="0" step="10" oninput="calc()"></div>
+      </div>
+    </div>
+
+    <div class="sttl">Desglose de seguros mensuales</div>
+    <div class="icard">
+      <div class="sg sg-hdr"><span>Cobertura</span><span style="text-align:right">UF/mes</span><span style="text-align:right">$/mes</span></div>
+      <div class="sg"><span>Seguro Desgravamen</span><input type="number" id="s-d" value="0.90" step="0.01" oninput="calc()"><span id="sd-c" style="text-align:right;font-size:11px;color:var(--text3)"></span></div>
+      <div class="sg"><span>Seguro Incendio y Sismo</span><input type="number" id="s-i" value="0.40" step="0.01" oninput="calc()"><span id="si-c" style="text-align:right;font-size:11px;color:var(--text3)"></span></div>
+      <div class="sg"><span>Seguro Cesantía</span><input type="number" id="s-c" value="0.30" step="0.01" oninput="calc()"><span id="sc-c" style="text-align:right;font-size:11px;color:var(--text3)"></span></div>
+      <div class="sg-tot"><span>Total Seguros</span><span id="st-u" style="text-align:right;color:var(--blue)">UF —</span><span id="st-c" style="text-align:right;color:var(--blue)">$—</span></div>
+    </div>
+
+    <div class="sttl">Costos adicionales</div>
+    <div class="icard">
+      <div class="g2" style="margin-bottom:12px">
+        <div class="fld"><label>Honorarios de gestión (%)</label><input type="number" id="hon-p" value="3" step="0.1" min="0" max="15" oninput="calc()"></div>
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Monto calculado</div>
+          <div style="font-size:15px;font-weight:600;color:var(--blue)" id="hon-u">UF —</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px" id="hon-c">$—</div>
+        </div>
+      </div>
+      <div style="border-top:0.5px solid var(--border);padding-top:12px">
+        <div class="ir"><span class="k">Pre-evaluación crediticia</span><span class="v" id="pe-u" style="color:var(--blue)">UF 6</span></div>
+        <div class="ir"><span class="k">Tipo de persona</span><span class="v" id="pe-t">Natural</span></div>
+        <div class="ir"><span class="k">Equivalente en pesos</span><span class="v" id="pe-c">$—</span></div>
+      </div>
+    </div>
+
+    <div class="sttl">Resultados de la simulación</div>
+    <div class="g4" style="margin-bottom:12px">
+      <div class="met hi"><div class="ml">Cuota mensual</div><div class="mv" id="r-ct">—</div><div class="ms" id="r-ct-c">—</div></div>
+      <div class="met"><div class="ml">Monto financiado</div><div class="mv" id="r-mf">—</div><div class="ms" id="r-mf-c">—</div></div>
+      <div class="met"><div class="ml">Total intereses</div><div class="mv" id="r-ti">—</div><div class="ms" id="r-ti-c">—</div></div>
+      <div class="met"><div class="ml">CAE estimado</div><div class="mv" id="r-cae">—</div><div class="ms">efectivo anual</div></div>
+    </div>
+    <div class="icard">
+      <div class="ir"><span class="k">Cuota capital + interés</span><span class="v" id="r-ci"></span></div>
+      <div class="ir"><span class="k">Total seguros</span><span class="v" id="r-ts"></span></div>
+      <div class="ir bold"><span>Cuota total mensual</span><span id="r-tot"></span></div>
+      <div class="ir"><span class="k">Ingreso líquido mínimo recomendado (25%)</span><span class="v" id="r-ing"></span></div>
+      <div class="ir"><span class="k">Pie / valor inmueble</span><span class="v" id="r-pp"></span></div>
+      <div class="ir"><span class="k">Honorarios + Pre-evaluación</span><span class="v" id="r-hpe"></span></div>
+    </div>
+    <div class="bw">
+      <div class="bt"><span>Porcentaje financiado del inmueble</span><span id="r-pct" style="font-weight:600;color:var(--blue)">—</span></div>
+      <div class="bbg"><div class="bfi" id="bar-i" style="width:80%"></div></div>
+    </div>
+
+    <div class="sttl">Tabla de amortización <span style="font-size:10px;font-weight:400;color:var(--text3)">(valores en UF)</span></div>
+    <div class="amw">
+      <table class="am">
+        <thead><tr><th style="text-align:left">N°</th><th>Cuota total</th><th>Capital</th><th>Interés</th><th>Seguros</th><th>Saldo</th></tr></thead>
+        <tbody id="am-b"></tbody>
+      </table>
+    </div>
+
+    <button class="btn" onclick="showTab('rpt')">Ver vista previa del informe →</button>
+    <button class="btn btn-pdf" id="btn-pdf" onclick="exportarPDF()">⬇ Descargar informe PDF</button>
+    <div class="err" id="pdf-err"></div>
+    <button class="btn2" onclick="enviarCorreo()">Enviar resumen al cliente por correo</button>
+  </div>
+
+  <!-- ── INFORME ────────────────────────────────────────────────────────── -->
+  <div id="rpt-view" style="display:none">
+
+    <div class="rpt-hdr">
+      <div>
+        <div class="rpt-logo"><span class="b">loan$</span><span class="g">4</span><span class="b">B</span><span style="font-size:14px;font-weight:500;color:var(--blue)">.com</span></div>
+        <div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:4px">Asesorías Loans4B — Financiamiento simple, rápido y confiable.</div>
+      </div>
+      <div class="rpt-meta">
+        <strong>Simulación de Crédito Hipotecario</strong>
+        <span id="rpt-meta">—</span>
+      </div>
+    </div>
+
+    <div class="rpt-card">
+      <div class="rpt-text" id="rpt-greet"></div>
+      <div class="rpt-text" id="rpt-body"></div>
+      <div class="rpt-hi" id="rpt-hon"></div>
+      <div class="rpt-nota">Nota: la cuota mensual estimada incluye seguros de desgravamen, incendio y sismo, y cesantía. Valores calculados con UF vigente al momento de la simulación.</div>
+    </div>
+
+    <div class="rpt-card">
+      <div class="rpt-sec">Desglose seguros mensuales</div>
+      <table class="rtbl"><thead><tr><th>Cobertura</th><th style="text-align:right">UF/mes</th><th style="text-align:right">$/mes</th></tr></thead><tbody id="rpt-segs"></tbody></table>
+    </div>
+
+    <div class="rpt-card">
+      <div class="rpt-sec">Resumen financiero</div>
+      <table class="rtbl" id="rpt-sum"></table>
+    </div>
+
+    <div class="rpt-card">
+      <div class="rpt-text">No dude en contactarnos para aclarar cualquier duda o proceder con la solicitud formal. Estamos comprometidos a acompañarle en cada etapa del proceso de financiamiento.</div>
+      <div class="rpt-text">Agradecemos su confianza y esperamos construir juntos un camino financiero sólido y exitoso.</div>
+      <div class="rpt-sig">
+        <div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px">Atentamente,</div>
+          <div style="font-size:14px;font-weight:600" id="rpt-asesor">Asesor Loans4B</div>
+          <div style="font-size:12px;color:var(--text3)">Asesor de Crédito Hipotecario</div>
+        </div>
+        <div style="text-align:right">
+          <div class="rpt-logo" style="font-size:18px"><span class="b">loan$</span><span class="g">4</span><span class="b">B</span><span style="font-size:11px;font-weight:500;color:var(--blue)">.com</span></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Asesorías Loans4B</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rpt-ft">Asesorías Loans4B es una empresa prestadora de servicios de asesoría y gestión en financiamiento hipotecario. No otorga financiamiento directo. Las simulaciones tienen carácter referencial y están sujetas a la evaluación de entidades financieras autorizadas por la CMF.</div>
+    <div class="rpt-ft" style="text-align:center">www.loans4b.com</div>
+    <div class="rpt-dis"><strong>Cláusula de Responsabilidad y Transparencia:</strong> La presente simulación tiene carácter informativo y no representa una oferta formal ni vinculante. Asesorías Loans4B actúa como intermediario en la gestión de créditos hipotecarios, sin representar a ninguna entidad financiera ni comprometer la aprobación del crédito. La tasa de interés, cuota y condiciones están sujetas a evaluación crediticia. Las simulaciones están sujetas a la evaluación de entidades autorizadas por la CMF, así como a modelos de financiamiento de fondos privados que operan conforme a la legislación civil y comercial vigente en Chile.</div>
+
+    <div class="rpt-actions" style="display:flex;gap:8px">
+      <button class="btn" onclick="showTab('sim')">← Volver al simulador</button>
+      <button class="btn btn-pdf" id="btn-pdf2" onclick="exportarPDF()">⬇ Descargar PDF</button>
+    </div>
+    <div class="err" id="pdf-err2"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+let UFV = 39908, _st = {};
+const COT = Math.floor(1000 + Math.random() * 9000);
+
+async function fetchUF() {
+  try {
+    const r = await fetch('https://mindicador.cl/api/uf');
+    const d = await r.json();
+    if (d.serie && d.serie[0]) {
+      UFV = d.serie[0].valor;
+      const f = new Date(d.serie[0].fecha).toLocaleDateString('es-CL');
+      document.getElementById('uf-d').textContent = '$' + UFV.toLocaleString('es-CL', { maximumFractionDigits: 0 });
+      document.getElementById('uf-s').textContent = 'Actualizado · ' + f;
+      document.getElementById('uf-f').textContent = f;
+      calc();
+    }
+  } catch (e) {
+    document.getElementById('uf-s').textContent = 'Sin conexión — ingrese manualmente';
+    document.getElementById('uf-m').style.display = 'flex';
+  }
+}
+
+function setTipo(t) {
+  document.getElementById('tp-n').className = t === 'n' ? 'on' : '';
+  document.getElementById('tp-j').className = t === 'j' ? 'on' : '';
+  calc();
+}
+function getTipo() { return document.getElementById('tp-j').className === 'on' ? 'j' : 'n'; }
+function togSub() { document.getElementById('sub-r').style.display = document.getElementById('sub-c').checked ? 'block' : 'none'; calc(); }
+function gv(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function fu(n) { return 'UF ' + n.toFixed(1); }
+function fuf(n) { return 'UF ' + n.toFixed(2); }
+function fc(n) { return '$' + Math.round(n * UFV).toLocaleString('es-CL'); }
+function mc(n) { return '≈ $' + Math.round(n * UFV).toLocaleString('es-CL'); }
+
+function getSimData() {
+  return {
+    nombre: document.getElementById('cl-n').value || '',
+    rut: document.getElementById('cl-r').value || '',
+    asesor: document.getElementById('cl-a').value || 'Asesor Loans4B',
+    tipo_persona: getTipo(),
+    vi: gv('p-vi'), pie: gv('p-pie'),
+    plazo: parseInt(document.getElementById('p-pz').value) || 20,
+    tasa: gv('p-ta'),
+    tipo_tasa: document.getElementById('p-tt').value,
+    subsidio_aplica: document.getElementById('sub-c').checked,
+    subsidio_monto: gv('sub-m'),
+    seg_d: gv('s-d'), seg_i: gv('s-i'), seg_c: gv('s-c'),
+    hon_pct: gv('hon-p'),
+    uf_val: UFV, cot_id: COT
+  };
+}
+
+function calc() {
+  const vi = gv('p-vi'), pie = gv('p-pie');
+  const sub = document.getElementById('sub-c').checked;
+  const subM = sub ? gv('sub-m') : 0;
+  const monto = Math.max(0, vi - pie - subM);
+  const plazo = parseInt(document.getElementById('p-pz').value) || 20;
+  const ta = gv('p-ta'), tipo = getTipo();
+  const sD = gv('s-d'), sI = gv('s-i'), sC = gv('s-c'), sT = sD + sI + sC;
+  const honP = gv('hon-p') / 100, honUF = monto * honP;
+  const peUF = tipo === 'j' ? 15 : 6;
+  const n = plazo * 12, r = ta / 100 / 12;
+  const ci = r === 0 ? (n > 0 ? monto / n : 0) : monto * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  const ct = ci + sT, totI = Math.max(0, ci * n - monto);
+  const cae = (Math.pow(1 + ta / 100 / 12, 12) - 1) * 100;
+  const pct = vi > 0 ? Math.min(100, Math.round((monto / vi) * 100)) : 0;
+
+  document.getElementById('sd-c').textContent = fc(sD);
+  document.getElementById('si-c').textContent = fc(sI);
+  document.getElementById('sc-c').textContent = fc(sC);
+  document.getElementById('st-u').textContent = fuf(sT);
+  document.getElementById('st-c').textContent = fc(sT);
+  document.getElementById('hon-u').textContent = fu(honUF);
+  document.getElementById('hon-c').textContent = fc(honUF);
+  document.getElementById('pe-u').textContent = 'UF ' + peUF;
+  document.getElementById('pe-t').textContent = tipo === 'j' ? 'Jurídica' : 'Natural';
+  document.getElementById('pe-c').textContent = fc(peUF);
+  document.getElementById('r-ct').textContent = fu(ct);
+  document.getElementById('r-ct-c').textContent = mc(ct);
+  document.getElementById('r-mf').textContent = fu(monto);
+  document.getElementById('r-mf-c').textContent = '≈ $' + (Math.round(monto * UFV / 1000000)).toFixed(1) + 'M';
+  document.getElementById('r-ti').textContent = fu(totI);
+  document.getElementById('r-ti-c').textContent = '≈ $' + (Math.round(totI * UFV / 1000000)).toFixed(1) + 'M';
+  document.getElementById('r-cae').textContent = cae.toFixed(2) + '%';
+  document.getElementById('r-ci').textContent = fuf(ci) + ' · ' + fc(ci);
+  document.getElementById('r-ts').textContent = fuf(sT) + ' · ' + fc(sT);
+  document.getElementById('r-tot').textContent = fuf(ct) + ' · ' + fc(ct);
+  document.getElementById('r-ing').textContent = fc(ct / 0.25);
+  document.getElementById('r-pp').textContent = fuf(pie) + ' (' + (vi > 0 ? Math.round(pie / vi * 100) : 0) + '%)';
+  document.getElementById('r-pct').textContent = pct + '%';
+  document.getElementById('r-hpe').textContent = fuf(honUF) + ' + ' + peUF + ' = ' + fuf(honUF + peUF) + ' (' + fc(honUF + peUF) + ')';
+  document.getElementById('bar-i').style.width = pct + '%';
+  buildAmort(monto, ci, sT, r, n);
+  _st = { vi, pie, sub, subM, monto, plazo, ta, tipo, ci, ct, sD, sI, sC, sT, totI, honUF, honP, peUF, cae, pct };
+  buildReport(_st);
+}
+
+function buildAmort(monto, ci, segs, r, n) {
+  const max = Math.min(n, 360), mid = Math.round(max / 2);
+  const items = []; let saldo = monto;
+  for (let i = 1; i <= max; i++) {
+    const int = saldo * r, cap = ci - int;
+    saldo = Math.max(0, saldo - cap);
+    if (i <= 5 || i === mid || i >= max - 4)
+      items.push({ i, ct: +(ci + segs).toFixed(2), cap: +Math.max(0, cap).toFixed(2), int: +Math.max(0, int).toFixed(2), segs: +segs.toFixed(2), saldo: +Math.max(0, saldo).toFixed(2) });
+  }
+  const dot = '<tr><td colspan="6" style="text-align:center;font-size:10px;color:var(--text3);padding:3px">···</td></tr>';
+  let html = '';
+  for (let j = 0; j < items.length; j++) {
+    if (j > 0 && items[j].i - items[j - 1].i > 1) html += dot;
+    const x = items[j];
+    html += `<tr><td>${x.i}</td><td>${x.ct}</td><td>${x.cap}</td><td>${x.int}</td><td>${x.segs}</td><td>${x.saldo}</td></tr>`;
+  }
+  document.getElementById('am-b').innerHTML = html;
+}
+
+function buildReport(d) {
+  const nombre = document.getElementById('cl-n').value || '[Nombre del cliente]';
+  const rut = document.getElementById('cl-r').value;
+  const asesor = document.getElementById('cl-a').value || 'Asesor Loans4B';
+  const tipoTxt = d.tipo === 'j' ? 'Jurídica' : 'Natural';
+  const tipoTasaTxt = document.getElementById('p-tt').value === 'fija' ? 'fija' : 'variable';
+  const today = new Date().toLocaleDateString('es-CL');
+  const vigencia = new Date(Date.now() + 5 * 86400000).toLocaleDateString('es-CL');
+
+  document.getElementById('rpt-meta').innerHTML = `ID COT: ${COT} &nbsp;·&nbsp; ${today}<br>Valor UF: $${UFV.toLocaleString('es-CL', { maximumFractionDigits: 0 })} &nbsp;·&nbsp; Vigente hasta: ${vigencia}`;
+  document.getElementById('rpt-asesor').textContent = asesor;
+  document.getElementById('rpt-greet').innerHTML = `<strong>Estimado/a: ${nombre}${rut ? ' / Rut ' + rut : ''}:</strong>`;
+
+  let body = `Nos complace presentarle esta simulación referencial de crédito hipotecario gestionada por <strong>ASESORÍAS LOANS4B</strong>. Tras revisar preliminarmente su perfil financiero como <strong>Persona ${tipoTxt}</strong>, la entidad financiera podrá evaluar un monto de financiamiento estimado en <strong>${fuf(d.monto)}</strong> (${fc(d.monto)}), con un pie de <strong>${fuf(d.pie)}</strong> (${fc(d.pie)})`;
+  if (d.sub && d.subM > 0) body += ` y un subsidio habitacional de <strong>${fuf(d.subM)}</strong> (${fc(d.subM)})`;
+  body += `, a una tasa nominal referencial de <strong>${d.ta}% anual ${tipoTasaTxt}</strong>, con un CAE estimado de <strong>${d.cae.toFixed(2)}% anual</strong> y un plazo de <strong>${d.plazo} años</strong>. La cuota mensual estimada sería de aproximadamente <strong>${fuf(d.ct)}</strong> (${fc(d.ct)}).`;
+  document.getElementById('rpt-body').innerHTML = body;
+  document.getElementById('rpt-hon').innerHTML =
+    `<strong>HONORARIOS DE GESTIÓN: ${fuf(d.honUF)}</strong> (${fc(d.honUF)}) — Incluye asesoría integral, tramitación legal, gastos notariales y operativos.<br><br>` +
+    `<strong>PRE-EVALUACIÓN CREDITICIA: ${d.peUF} UF</strong> (${fc(d.peUF)}) — Persona ${tipoTxt}.`;
+
+  document.getElementById('rpt-segs').innerHTML =
+    `<tr><td>Seguro Desgravamen</td><td style="text-align:right">UF ${d.sD.toFixed(2)}</td><td>${fc(d.sD)}</td></tr>` +
+    `<tr><td>Seguro Incendio y Sismo</td><td style="text-align:right">UF ${d.sI.toFixed(2)}</td><td>${fc(d.sI)}</td></tr>` +
+    `<tr><td>Seguro Cesantía</td><td style="text-align:right">UF ${d.sC.toFixed(2)}</td><td>${fc(d.sC)}</td></tr>` +
+    `<tr class="tot"><td><strong>Total Seguros</strong></td><td style="text-align:right"><strong>UF ${d.sT.toFixed(2)}</strong></td><td><strong>${fc(d.sT)}</strong></td></tr>`;
+
+  const subRow = d.sub && d.subM > 0 ? `<tr><td>Subsidio habitacional</td><td style="text-align:right">${d.subM.toFixed(0)}</td><td style="text-align:right">${fc(d.subM)}</td></tr>` : '';
+  document.getElementById('rpt-sum').innerHTML =
+    `<thead><tr><th>Concepto</th><th style="text-align:right">UF</th><th style="text-align:right">Pesos ($)</th></tr></thead><tbody>` +
+    `<tr><td>Valor del inmueble</td><td style="text-align:right">${d.vi.toFixed(0)}</td><td style="text-align:right">${fc(d.vi)}</td></tr>` +
+    `<tr><td>Pie</td><td style="text-align:right">${d.pie.toFixed(0)}</td><td style="text-align:right">${fc(d.pie)}</td></tr>` +
+    subRow +
+    `<tr><td>Monto financiado</td><td style="text-align:right">${d.monto.toFixed(2)}</td><td style="text-align:right">${fc(d.monto)}</td></tr>` +
+    `<tr><td>Cuota capital + interés</td><td style="text-align:right">${d.ci.toFixed(2)}</td><td style="text-align:right">${fc(d.ci)}</td></tr>` +
+    `<tr><td>Total seguros mensuales</td><td style="text-align:right">${d.sT.toFixed(2)}</td><td style="text-align:right">${fc(d.sT)}</td></tr>` +
+    `<tr class="tot"><td><strong>Cuota mensual total</strong></td><td style="text-align:right"><strong>${d.ct.toFixed(2)}</strong></td><td style="text-align:right"><strong>${fc(d.ct)}</strong></td></tr>` +
+    `<tr><td>Honorarios de gestión (${(d.honP * 100).toFixed(1)}%)</td><td style="text-align:right">${d.honUF.toFixed(2)}</td><td style="text-align:right">${fc(d.honUF)}</td></tr>` +
+    `<tr><td>Pre-evaluación (Persona ${tipoTxt})</td><td style="text-align:right">${d.peUF}</td><td style="text-align:right">${fc(d.peUF)}</td></tr>` +
+    `</tbody>`;
+}
+
+function updRpt() { buildReport(_st); }
+
+function showTab(t) {
+  const s = t === 'sim';
+  document.getElementById('sim-view').style.display = s ? 'block' : 'none';
+  document.getElementById('rpt-view').style.display = s ? 'none' : 'block';
+  document.getElementById('t-sim').className = 'tab' + (s ? ' on' : '');
+  document.getElementById('t-rpt').className = 'tab' + (s ? '' : ' on');
+  if (!s) buildReport(_st);
+}
+
+async function exportarPDF() {
+  const btns = ['btn-pdf', 'btn-pdf2'].map(id => document.getElementById(id)).filter(Boolean);
+  const errs = ['pdf-err', 'pdf-err2'].map(id => document.getElementById(id)).filter(Boolean);
+  btns.forEach(b => { b.disabled = true; b.textContent = 'Generando PDF…'; });
+  errs.forEach(e => e.style.display = 'none');
+  try {
+    const resp = await fetch('/generar_pdf_hipotecario', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(getSimData())
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error || 'Error en el servidor');
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Simulacion_Hipotecaria_${document.getElementById('cl-n').value || 'Cliente'}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    errs.forEach(el => { el.textContent = '⚠ ' + e.message; el.style.display = 'block'; });
+  } finally {
+    btns.forEach(b => { b.disabled = false; b.textContent = '⬇ Descargar PDF'; });
+  }
+}
+
+function enviarCorreo() {
+  const email = document.getElementById('cl-e').value;
+  const nombre = document.getElementById('cl-n').value || 'Cliente';
+  const d = _st;
+  const subject = encodeURIComponent('Simulación de Crédito Hipotecario — Asesorías Loans4B');
+  const body = encodeURIComponent(
+    `Estimado/a ${nombre},\n\nAdjuntamos la simulación referencial de crédito hipotecario:\n\n` +
+    `• Monto financiado: ${fuf(d.monto)} (${fc(d.monto)})\n` +
+    `• Pie: ${fuf(d.pie)} (${fc(d.pie)})\n` +
+    `• Plazo: ${d.plazo} años | Tasa: ${d.ta}% anual\n` +
+    `• CAE estimado: ${d.cae.toFixed(2)}%\n` +
+    `• Cuota mensual total: ${fuf(d.ct)} (${fc(d.ct)})\n\n` +
+    `Honorarios de gestión: ${fuf(d.honUF)} (${fc(d.honUF)})\n` +
+    `Pre-evaluación: UF ${d.peUF} (${fc(d.peUF)})\n\n` +
+    `Atentamente,\nAsesorías Loans4B\nwww.loans4b.com\n\n` +
+    `* Simulación con carácter referencial.`
+  );
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+fetchUF();
+calc();
+</script>
+</body>
+</html>
