@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: loans4b-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --timeout 120
+    healthCheckPath: /
+    autoDeploy: true
