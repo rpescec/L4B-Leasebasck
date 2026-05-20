@@ -54,7 +54,7 @@ def calcular(d):
     goA  = vf * pg
     feA  = vf * pfe
     ffA  = vf * pff
-    ia1  = vf * tm * 12
+    ia1  = vf * tm * plz
     desc = ia1 + feA + ffA
     ml   = vf - desc - deu
 
