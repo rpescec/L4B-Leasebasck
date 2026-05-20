@@ -311,7 +311,7 @@
     <div class="g4" style="margin-bottom:12px">
       <div class="met hi"><div class="ml">Cuota mensual</div><div class="mv" id="r-ct">—</div><div class="ms" id="r-ct-c">—</div></div>
       <div class="met"><div class="ml">Monto financiado</div><div class="mv" id="r-mf">—</div><div class="ms" id="r-mf-c">—</div></div>
-      <div class="met"><div class="ml">Total intereses</div><div class="mv" id="r-ti">—</div><div class="ms" id="r-ti-c">—</div></div>
+      <div class="met"><div class="ml">Total interéses</div><div class="mv" id="r-ti">—</div><div class="ms" id="r-ti-c">—</div></div>
       <div class="met"><div class="ml">CAE estimado</div><div class="mv" id="r-cae">—</div><div class="ms">efectivo anual</div></div>
     </div>
     <div class="icard">
@@ -388,9 +388,9 @@
       </div>
     </div>
 
-    <div class="rpt-ft">Asesorías Loans4B es una empresa prestadora de servicios de asesoría y gestión en financiamiento hipotecario. No otorga financiamiento directo. Las simulaciones tienen carácter referencial y están sujetas a la evaluación de entidades financieras autorizadas por la CMF.</div>
+    <div class="rpt-ft">Asesorías Loans4B es una empresa prestadora de servicios de asesoría y gestión en financiamiento hipotecario. No otorga financiamiento directo. Las simulaciónes tienen carácter referencial y están sujetas a la evaluación de entidades financieras autorizadas por la CMF.</div>
     <div class="rpt-ft" style="text-align:center">www.loans4b.com</div>
-    <div class="rpt-dis"><strong>Cláusula de Responsabilidad y Transparencia:</strong> La presente simulación tiene carácter informativo y no representa una oferta formal ni vinculante. Asesorías Loans4B actúa como intermediario en la gestión de créditos hipotecarios, sin representar a ninguna entidad financiera ni comprometer la aprobación del crédito. La tasa de interés, cuota y condiciones están sujetas a evaluación crediticia. Las simulaciones están sujetas a la evaluación de entidades autorizadas por la CMF, así como a modelos de financiamiento de fondos privados que operan conforme a la legislación civil y comercial vigente en Chile.</div>
+    <div class="rpt-dis"><strong>Cláusula de Responsabilidad y Transparencia:</strong> La presente simulación tiene carácter informativo y no representa una oferta formal ni vinculante. Asesorías Loans4B actúa como intermediario en la gestión de créditos hipotecarios, sin representar a ninguna entidad financiera ni comprometer la aprobación del crédito. La tasa de interés, cuota y condiciones están sujetas a evaluación crediticia. Las simulaciónes están sujetas a la evaluación de entidades autorizadas por la CMF, así como a modelos de financiamiento de fondos privados que operan conforme a la legislación civil y comercial vigente en Chile.</div>
 
     <div class="rpt-actions" style="display:flex;gap:8px">
       <button class="btn" onclick="showTab('sim')">← Volver al simulador</button>
@@ -533,7 +533,7 @@ function buildReport(d) {
   document.getElementById('rpt-asesor').textContent = asesor;
   document.getElementById('rpt-greet').innerHTML = `<strong>Estimado/a: ${nombre}${rut ? ' / Rut ' + rut : ''}:</strong>`;
 
-  let body = `Nos complace presentarle esta simulación referencial de crédito hipotecario gestionada por <strong>ASESORÍAS LOANS4B</strong>. Tras revisar preliminarmente su perfil financiero como <strong>Persona ${tipoTxt}</strong>, la entidad financiera podrá evaluar un monto de financiamiento estimado en <strong>${fuf(d.monto)}</strong> (${fc(d.monto)}), con un pie de <strong>${fuf(d.pie)}</strong> (${fc(d.pie)})`;
+  let body = `Nos complace presentarle esta simulación referencial de crédito hipotecario gestiónada por <strong>ASESORÍAS LOANS4B</strong>. Tras revisar preliminarmente su perfil financiero como <strong>Persona ${tipoTxt}</strong>, la entidad financiera podrá evaluar un monto de financiamiento estimado en <strong>${fuf(d.monto)}</strong> (${fc(d.monto)}), con un pie de <strong>${fuf(d.pie)}</strong> (${fc(d.pie)})`;
   if (d.sub && d.subM > 0) body += ` y un subsidio habitacional de <strong>${fuf(d.subM)}</strong> (${fc(d.subM)})`;
   body += `, a una tasa nominal referencial de <strong>${d.ta}% anual ${tipoTasaTxt}</strong>, con un CAE estimado de <strong>${d.cae.toFixed(2)}% anual</strong> y un plazo de <strong>${d.plazo} años</strong>. La cuota mensual estimada sería de aproximadamente <strong>${fuf(d.ct)}</strong> (${fc(d.ct)}).`;
   document.getElementById('rpt-body').innerHTML = body;
@@ -592,7 +592,7 @@ async function exportarPDF() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Simulacion_Hipotecaria_${document.getElementById('cl-n').value || 'Cliente'}.pdf`;
+    a.download = `Simulación_Hipotecaria_${document.getElementById('cl-n').value || 'Cliente'}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
