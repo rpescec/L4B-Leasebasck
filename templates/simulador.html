@@ -206,7 +206,7 @@ function calcular(){
   const vc=g('vc'),pf=g('pf')/100,tm=g('tm')/100,plz=g('plazo'),
         go=g('go')/100,fe=g('fe')/100,cbr=g('cbr'),deu=g('deu');
   if(!vc){alert('Ingresa el valor comercial');return;}
-  const ff=g("fee_fondo")/100;const vf=vc*pf,goA=vf*go,feA=vf*fe,ffA=vf*ff,ia1=vf*tm*12;
+  const ff=g("fee_fondo")/100;const vf=vc*pf,goA=vf*go,feA=vf*fe,ffA=vf*ff,ia1=vf*tm*plz;
   const desc=ia1+feA+ffA;const ml=vf-desc-deu;
   const cuota=plz>0?vf*(tm*Math.pow(1+tm,plz))/(Math.pow(1+tm,plz)-1):vf;
   const tp=cuota*plz,cf=tp-vf,tae=(Math.pow(1+tm,12)-1)*100;
