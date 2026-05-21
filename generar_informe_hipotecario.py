@@ -216,9 +216,9 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
 
     # ── Cuerpo narrativo ───────────────────────────────────────────────────
     story.append(Paragraph(
-        f"Nos complace presentarle esta simulación referencial de crédito hipotecario gestiónada por "
-        f"<b>ASESORIAS LOANS4B</b>. Tras revisar preliminarmente su perfil financiero como "
-        f"<b>Persona {TIPO_PERS}</b>, la entidad financiera podra evaluar un crédito equivalente al "
+        f"Nos complace presentarle esta simulación referencial de crédito hipotecario gestionada por "
+        f"<b>ASESORÍAS LOANS4B</b>. Tras revisar preliminarmente su perfil financiero como "
+        f"<b>Persona {TIPO_PERS}</b>, la entidad financiera podrá evaluar un crédito equivalente al "
         f"<b>{round((MONTO/VI)*100) if VI > 0 else 0}% del valor total del inmueble</b>, lo que "
         f"representa <b>{u(MONTO)}</b> ({fc(MONTO)}). "
         f"El aporte inicial (pie) asciende a <b>{u(PIE)}</b> ({fc(PIE)}), "
@@ -227,12 +227,12 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
 
     if SUB > 0:
         story.append(Paragraph(
-            f"El financiamiento contempla ademas un <b>subsidio habitacional de {u(SUB)}</b> "
+            f"El financiamiento contempla además un <b>subsidio habitacional de {u(SUB)}</b> "
             f"({fc(SUB)}), el cual se descuenta del monto a financiar.",
             ST_BODY))
 
     story.append(Paragraph(
-        f"El financiamiento se estructura a un plazo de <b>{PLAZO} anos</b>, con una tasa nominal "
+        f"El financiamiento se estructura a un plazo de <b>{PLAZO} años</b>, con una tasa nominal "
         f"anual <b>{TIPO_TASA} del {TASA}%</b> y una Carga Anual Equivalente (CAE) estimada de "
         f"<b>{cae:.2f}%</b>. La cuota mensual total estimada — que ya contempla los seguros "
         f"obligatorios — asciende a <b>{u1(ct)}</b> mensuales ({fc(ct)}).",
@@ -288,8 +288,8 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
                    _S('sr2', fontSize=8.5, fontName='Helvetica-Bold',
                       textColor=BLUE, leading=12, alignment=TA_RIGHT))],
         [Paragraph("<b>Seguro Cesantía</b>", ST_KV_V),
-         Paragraph("Subsidia el pago de cuotas ante la perdida involuntaria del empleo, "
-                   "evitando incumplimientos durante periodos de desocupación.", ST_SMALL),
+         Paragraph("Subsidia el pago de cuotas ante la pérdida involuntaria del empleo, "
+                   "evitando incumplimientos durante períodos de desocupación.", ST_SMALL),
          Paragraph(f"<b>{u(SEG_CES)}/mes</b><br/><font color='#8FA3B8'>{fc(SEG_CES)}</font>",
                    _S('sr3', fontSize=8.5, fontName='Helvetica-Bold',
                       textColor=BLUE, leading=12, alignment=TA_RIGHT))],
@@ -310,7 +310,7 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
     story.append(Spacer(1, 1*mm))
     story.append(Paragraph(
         f"El total de seguros incluidos en la cuota asciende a <b>{u(SEG_TOT)}</b> mensual "
-        f"({fc(SEG_TOT)}). Este monto puede variar segun la entidad financiera evaluadora.",
+        f"({fc(SEG_TOT)}). Este monto puede variar según la entidad financiera evaluadora.",
         ST_SMALL))
 
     # ── Honorarios ─────────────────────────────────────────────────────────
@@ -325,30 +325,30 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
     story.append(Paragraph(
         f"Adicionalmente, el proceso de <b>pre-evaluación crediticia</b> tiene un costo de "
         f"<b>{PRE_EVAL} UF</b> ({fc(PRE_EVAL)}) para Persona {TIPO_PERS}. Esta etapa permite "
-        f"conocer anticipadamente las condiciones que la entidad financiera ofrecera, antes de "
+        f"conocer anticipadamente las condiciones que la entidad financiera ofrecerá, antes de "
         f"iniciar la tramitación formal del crédito.",
         ST_BODY))
     story.append(Spacer(1, 2*mm))
     story.append(_highlight([
         f"  \u2713  Honorarios de gestión ({HON_PCT:.0f}%):  {u(HON_UF)}  ({fc(HON_UF)})",
         f"  \u2713  Pre-evaluación crediticia (Persona {TIPO_PERS}):  {PRE_EVAL} UF  ({fc(PRE_EVAL)})",
-        f"  \u2713  Propuesta valida hasta el {VIGENCIA}",
+        f"  \u2713  Propuesta válida hasta el {VIGENCIA}",
     ]))
 
     # ── Resumen ────────────────────────────────────────────────────────────
     story += _section("Resumen de la operación")
     story.append(Paragraph(
-        f"En terminos globales, la operación contempla un inmueble valorado en <b>{u(VI)}</b> "
+        f"En términos globales, la operación contempla un inmueble valorado en <b>{u(VI)}</b> "
         f"({fc(VI)}). El cliente aporta un pie del <b>{round((PIE/VI)*100) if VI > 0 else 0}%</b>, "
         f"mientras que el <b>{round((MONTO/VI)*100) if VI > 0 else 0}% restante</b> se financia a "
-        f"traves de este crédito hipotecario. A lo largo de los {PLAZO} años de vigencia, el costo "
-        f"estimado en interéses es de <b>{u1(tot_int)}</b>, considerando la tasa nominal "
+        f"través de este crédito hipotecario. A lo largo de los {PLAZO} años de vigencia, el costo "
+        f"estimado en intereses es de <b>{u1(tot_int)}</b>, considerando la tasa nominal "
         f"{TIPO_TASA} del {TASA}% anual.",
         ST_BODY))
     story.append(Spacer(1, 2*mm))
     story.append(Paragraph(
         f"Para acceder a este financiamiento, se estima que el solicitante debe acreditar un "
-        f"<b>ingreso liquido mensual minimo de {fc(ct/0.25)}</b>, de modo que la cuota no supere "
+        f"<b>ingreso líquido mensual mínimo de {fc(ct/0.25)}</b>, de modo que la cuota no supere "
         f"el 25% de sus ingresos, criterio habitualmente utilizado por las entidades financieras "
         f"en su proceso de evaluación.",
         ST_BODY))
@@ -396,13 +396,13 @@ def generate_pdf_hipotecario(data, output_path, logo_path):
     story.append(_divider())
     story.append(Spacer(1, 1*mm))
     story.append(Paragraph(
-        "<b>Clausula de Responsabilidad y Transparencia:</b> La presente simulación tiene carácter "
-        "informativo y no representa una oferta formal ni vinculante. Asesorías Loans4B actua como "
+        "<b>Cláusula de Responsabilidad y Transparencia:</b> La presente simulación tiene carácter "
+        "informativo y no representa una oferta formal ni vinculante. Asesorías Loans4B actúa como "
         "intermediario en la gestión de créditos hipotecarios, sin representar a ninguna entidad "
         "financiera ni comprometer la aprobación del crédito. La tasa de interés, cuota y "
-        "condiciones estan sujetas a evaluación crediticia por parte del banco o institucion "
-        "correspondiente. Las simulaciónes estan sujetas a la evaluación de entidades financieras "
-        "debidamente autorizadas por la CMF, asi como a modelos de financiamiento de fondos "
+        "condiciones están sujetas a evaluación crediticia por parte del banco o institución "
+        "correspondiente. Las simulaciones están sujetas a la evaluación de entidades financieras "
+        "debidamente autorizadas por la CMF, así como a modelos de financiamiento de fondos "
         "privados que operan conforme a la legislación civil y comercial vigente en Chile.",
         ST_DISC))
 
